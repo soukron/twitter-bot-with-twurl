@@ -14,4 +14,4 @@ run: ## Runs the bot in a container
 	       /bin/bash -c "cd /opt/bot && make run-bot" | tee -a bot.log
 
 run-bot: ## Runs the bot code
-	./bot.sh
+	@./bot.sh
