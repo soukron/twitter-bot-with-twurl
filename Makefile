@@ -10,7 +10,7 @@ build: ## Builds viktortrasto/twurl:latest image with ruby and twurl gem.
 	docker build -t viktortrasto/twurl:latest .
 
 run: ## Runs the bot in a ruby container container.
-	@docker inspect viktortrasto/twurl:latest >/dev/null &>1 || (echo "Image not found. Run \"make build\" first."; exit 1)
+	@docker inspect viktortrasto/twurl:latest >/dev/null 2>&1 || (echo "Image not found. Run \"make build\" first."; exit 1)
 	docker run --rm -v \
 	       $(dir $(realpath $(firstword $(MAKEFILE_LIST)))):/opt/bot \
 	       viktortrasto/twurl:latest \

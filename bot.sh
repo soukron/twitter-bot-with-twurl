@@ -1,4 +1,14 @@
 #!/bin/bash
+#
+# Twitter bot interacting with @viktortrasto
+#
+# by Sergio G. <soukron@gmbros.net>
+#
+# TODO:
+#   - create functions to interact with the API
+#   - specifically when getting the tweets: sanitize them properly
+#   - read .twurlrc content from env vars
+#   - shellcheck
 
 # set timezone
 TZ='Europe/Madrid'; export TZ
@@ -57,16 +67,15 @@ fav_aoc() {
 # a las 9:00, 14:00 y 19:00
 copy_tweets() {
   _currTime=$( date +"%H%M" )
+  _account=$( shuf -e vlcextra elmundotoday levante_emv MeridianoHorta | head -1 )
 
   case "${_currTime}" in
-    "9000" | "1200" | "1900")
-      _account=$( shuf -e vlcextra elmundotoday levante_emv MeridianoHorta | head -1 )
-
+    "0900" | "1200" | "1900")
       echo "$(pdate)" - COPY - Getting last tweet from account - account: "${_account}"
       readarray -t _tweet< <( twurl "/1.1/statuses/user_timeline.json?screen_name=${_account}&count=1&tweet_mode=extended&exclude_replies=true&include_rts=false" | jq -r '.[0] | [.id, .full_text]' )
-      _status=$( echo "${_tweet[2]}" | tail -c +2 | head -c -2 )
+      _status=$( echo ${_tweet[2]} | tail -c +2 | head -c -2 )
 
-      echo "$(pdate)" - COPY - Publishing new tweet copied from account - account: "${_account}", status: "${_status}"
+      echo "$(pdate)" - COPY - Publishing new tweet copied from account - account: "${_account}", time: "${_currTime}", status: "${_status}"
       twurl -X POST "/1.1/statuses/update.json?status=${_status}" >/dev/null 2>&1
       ;;
     *)
