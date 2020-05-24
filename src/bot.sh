@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Twitter bot interacting with @viktortrasto
+# Twitter bot using twurl
 #
 # by Sergio G. <soukron@gmbros.net>
 #
@@ -43,31 +43,25 @@ followback() {
   done
 }
 
-# fav ultimo tweet de @aoc_spain
-fav_aoc() {
-  _account="@aoc_spain"
+# fav ultimo tweet de ciertas cuentas
+fav_tweets() {
+  for _account in ${BOT_FAVTWEETS:-@twitter}; do
+    echo "$(pdate)" - FAV - Getting last tweet from account - account: "${_account}"
+    readarray -t _tweet< <( twurl "/1.1/statuses/user_timeline.json?screen_name=${_account}&count=1&tweet_mode=extended&exclude_replies=true&include_rts=false" | jq -r '.[0] | [.id, .full_text, .favorited]' )
 
-  echo "$(pdate)" - FAV - Getting last tweet from account - account: "${_account}"
-  readarray -t _tweet< <( twurl "/1.1/statuses/user_timeline.json?screen_name=${_account}&count=1&tweet_mode=extended&exclude_replies=true&include_rts=false" | jq -r '.[0] | [.id, .full_text, .favorited]' )
-
-  if [[ "${_tweet[3]}" == "   false" ]]; then
-    echo "$(pdate)" - FAV - Favoriting last tweet from account - account: "${_account}", id: "${_tweet[1]%?}", text: "${_tweet[2]}"
-    twurl -X POST "/1.1/favorites/create.json?id=$( echo "${_tweet[1]%?}" | xargs )" >/dev/null 2>&1
-  else
-    echo "$(pdate)" - FAV - Skipping favorite \(already favorited\) - account: "${_account}", id: "${_tweet[1]%?}", text: "${_tweet[2]}"
-  fi
-
+    if [[ "${_tweet[3]}" == "   false" ]]; then
+      echo "$(pdate)" - FAV - Favoriting last tweet from account - account: "${_account}", id: "${_tweet[1]%?}", text: "${_tweet[2]}"
+      twurl -X POST "/1.1/favorites/create.json?id=$( echo "${_tweet[1]%?}" | xargs )" >/dev/null 2>&1
+    else
+      echo "$(pdate)" - FAV - Skipping favorite \(already favorited\) - account: "${_account}", id: "${_tweet[1]%?}", text: "${_tweet[2]}"
+    fi
+  done
 }
 
-# copiar tweets de
-#  - @vlcextra
-#  - @MeridianoHorta
-#  - @levante_emv
-#  - @elmundotoday
-# a las 9:00, 14:00 y 19:00
+# copiar tweets de ciertas cuentas a las 9:00, 14:00 y 19:00
 copy_tweets() {
   _currTime=$( date +"%H%M" )
-  _account=$( shuf -e vlcextra elmundotoday levante_emv MeridianoHorta | head -1 )
+  _account=$( shuf -e ${BOT_COPYTWEETS:-@twitter} | head -n 1 )
 
   case "${_currTime}" in
     "0900" | "1200" | "1900")
@@ -86,7 +80,23 @@ copy_tweets() {
 
 # copy .twurlrc to $HOME
 prepare_twurl() {
-  echo "$(pdate)" - PREPARE - Copying .twurlrc - "$( cp -v "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/.twurlrc "${HOME}"/.twurlrc )"
+  echo "$(pdate)" - PREPARE - Creating .twurlrc from ENV vars - BOT_USERNAME, BOT_CONSUMER_KEY, BOT_CONSUMER_SECRET, BOT_TOKEN, BOT_SECRET
+
+  cat <<EOF> "${HOME}/.twurlrc"
+---
+profiles:
+  ${BOT_USERNAME}:
+    ${BOT_CONSUMER_KEY}:
+      username: ${BOT_USERNAME}
+      consumer_key: ${BOT_CONSUMER_KEY}
+      consumer_secret: ${BOT_CONSUMER_SECRET}
+      token: ${BOT_TOKEN}
+      secret: ${BOT_SECRET}
+configuration:
+  default_profile:
+  - ${BOT_USERNAME}
+  - ${BOT_CONSUMER_KEY}
+EOF
 }
 
 # acciones
@@ -94,7 +104,7 @@ main() {
   start
   prepare_twurl
   followback
-  fav_aoc
+  fav_tweets
   copy_tweets
   end
 }
