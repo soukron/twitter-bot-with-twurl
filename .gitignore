@@ -2,6 +2,12 @@
 !/config
 !/config/default.env
 !/deploy
+!/deploy/argocd
+!/deploy/argocd/pro-app.yaml
+!/deploy/argocd/pro
+!/deploy/argocd/pro/cronjob.yaml
+!/deploy/argocd/pro/namespace.yaml
+!/deploy/argocd/pro/sealed-secret.yaml
 !/dockerfiles
 !/dockerfiles/twurl
 !/dockerfiles/twurl/Dockerfile

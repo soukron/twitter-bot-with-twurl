@@ -1,0 +1,22 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: bot-execution
+spec:
+  schedule: "*/10 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: bot
+            image: quay.io/soukron/twurl-bot:latest
+            imagePullPolicy: Always
+            args:
+            - /bin/sh
+            - -c
+            - cd /opt/bot/src; ./bot.sh
+            envFrom:
+            - secretRef:
+                name: config-secret
+          restartPolicy: Never

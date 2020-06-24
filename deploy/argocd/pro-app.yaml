@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: twurlbot-pro
+  namespace: argocd
+spec:
+  destination:
+    namespace: twurlbot-pro
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: deploy/argocd/pro
+    repoURL: 'https://github.com/soukron/twitter-bot-with-twurl'
+    targetRevision: master
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
