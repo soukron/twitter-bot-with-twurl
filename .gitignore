@@ -1,6 +1,7 @@
 *
 !/config
 !/config/default.env
+!/deploy
 !/dockerfiles
 !/dockerfiles/twurl
 !/dockerfiles/twurl/Dockerfile

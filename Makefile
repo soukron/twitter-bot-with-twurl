@@ -24,22 +24,36 @@ version: ## Output the current version.
 # DOCKER TASKS #
 ################
 # Build the container
-build: ## Builds the container image.
+build-base: ## Builds the base container image.
 	docker build -t $(REGISTRY_NAMESPACE)/$(IMAGE_NAME):$(IMAGE_VERSION) dockerfiles/$(IMAGE_NAME)/.
 
+build-bot: ## Builds the container image including the bot.sh code
+	cp -f src/bot.sh dockerfiles/$(IMAGE_NAME)-bot/
+	docker build -t $(REGISTRY_NAMESPACE)/$(IMAGE_NAME)-bot:$(IMAGE_VERSION) dockerfiles/$(IMAGE_NAME)-bot/.
+
 # Tag the containers
-tag: tag-latest tag-version ## Generate container tags for this version and latest tags.
-tag-version: ## Generate container version tag only.
+tag-base: tag-latest-base tag-version-base ## Generate base container tags for this version and latest tags.
+tag-version-base: ## Generate base container version tag only.
 	docker tag $(REGISTRY_NAMESPACE)/$(IMAGE_NAME):$(IMAGE_VERSION) $(REGISTRY_HOSTNAME)/$(REGISTRY_NAMESPACE)/$(IMAGE_NAME):$(IMAGE_VERSION)
-tag-latest: ## Generate container latest tag only.
+tag-latest-base: ## Generate base container latest tag only.
 	docker tag $(REGISTRY_NAMESPACE)/$(IMAGE_NAME):$(IMAGE_VERSION) $(REGISTRY_HOSTNAME)/$(REGISTRY_NAMESPACE)/$(IMAGE_NAME):latest
+tag-bot: tag-latest-bot tag-version-bot ## Generate bot container tags for this version and latest tags.
+tag-version-bot: ## Generate bot container version tag only.
+	docker tag $(REGISTRY_NAMESPACE)/$(IMAGE_NAME)-bot:$(IMAGE_VERSION) $(REGISTRY_HOSTNAME)/$(REGISTRY_NAMESPACE)/$(IMAGE_NAME)-bot:$(IMAGE_VERSION)
+tag-latest-bot: ## Generate bot container latest tag only.
+	docker tag $(REGISTRY_NAMESPACE)/$(IMAGE_NAME)-bot:$(IMAGE_VERSION) $(REGISTRY_HOSTNAME)/$(REGISTRY_NAMESPACE)/$(IMAGE_NAME)-bot:latest
 
 # Publish the container
-publish: publish-latest publish-version ## Publish the image to the remote registry.
-publish-version: ## Publish containers with version tag only.
+publish-base: publish-latest-base publish-version-base ## Publish the base image to the remote registry.
+publish-version-base: ## Publish base containers with version tag only.
 	docker push $(REGISTRY_HOSTNAME)/$(REGISTRY_NAMESPACE)/$(IMAGE_NAME):$(IMAGE_VERSION)
-publish-latest: ## Publish containers with latest tag only.
+publish-latest-base: ## Publish base containers with latest tag only.
 	docker push $(REGISTRY_HOSTNAME)/$(REGISTRY_NAMESPACE)/$(IMAGE_NAME):latest
+publish-bot: publish-latest-bot publish-version-bot ## Publish the bot image to the remote registry.
+publish-version-bot: ## Publish bot containers with version tag only.
+	docker push $(REGISTRY_HOSTNAME)/$(REGISTRY_NAMESPACE)/$(IMAGE_NAME)-bot:$(IMAGE_VERSION)
+publish-latest-bot: ## Publish bot containers with latest tag only.
+	docker push $(REGISTRY_HOSTNAME)/$(REGISTRY_NAMESPACE)/$(IMAGE_NAME)-bot:latest
 
 #############
 # EXECUTION #
