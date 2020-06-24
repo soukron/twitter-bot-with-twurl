@@ -1,0 +1,14 @@
+*
+!/config
+!/config/default.env
+!/dockerfiles
+!/dockerfiles/twurl
+!/dockerfiles/twurl/Dockerfile
+!/dockerfiles/twurl-bot
+!/dockerfiles/twurl/Dockerfile
+!/src
+!/src/bot.sh
+!LICENSE
+!Makefile
+!README.md
+!.gitignore
