@@ -4,6 +4,8 @@ metadata:
   name: bot-execution
 spec:
   schedule: "*/10 * * * *"
+  successfulJobsHistoryLimit: 6
+  failedJobsHistoryLimit: 6
   jobTemplate:
     spec:
       template:
